@@ -10,11 +10,11 @@ Each state is updated using the **Bellman expectation equation** until the value
 
 ### Greedy Path Visualization
 
-The video below shows the agent following the greedy path extracted from the final value table.
+The animation below shows the agent following the greedy path extracted from the final value table.
 
-<video src="path_visualization.mp4" controls width="700"></video>
+![Greedy Path Visualization](path_visualization.gif)
 
-If the video does not render directly on GitHub, open it here:
+If the GIF does not load, you can view the MP4 version here:
 
 [View path visualization video](path_visualization.mp4)
 
@@ -32,7 +32,7 @@ The project includes:
 - Iterative policy evaluation
 - Value-table visualization
 - Greedy path extraction from the final value table
-- Path visualization saved as a video
+- Path visualization saved as a video/GIF
 
 ---
 
@@ -145,9 +145,10 @@ The final greedy path is saved as:
 
 ```text
 path_visualization.mp4
+path_visualization.gif
 ```
 
-This file is included in the repository and shown in the demo section above.
+The GIF version is used in the README preview.
 
 ---
 
@@ -173,6 +174,7 @@ policy-iteration/
 ├── main.py
 ├── visualization.py
 ├── path_visualization.mp4
+├── path_visualization.gif
 ├── README.md
 └── .gitignore
 ```
@@ -246,7 +248,6 @@ A full control algorithm would require implementing:
 - Add obstacles and walls
 - Add stochastic transitions
 - Add policy arrows visualization
-- Add GIF export for README compatibility
 - Compare random policy vs improved policy
 - Add multiple terminal states
 
