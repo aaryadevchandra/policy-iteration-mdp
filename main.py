@@ -1,8 +1,14 @@
 import numpy as np
 
-grid = np.zeros((10, 10), dtype=np.float32)
+np.set_printoptions(precision=15, suppress=True)
+
+terminal_coord = [9, 9]
+
+grid = np.zeros((10, 10), dtype=np.float64)
 grid[:, :] = -1
-grid[-1, -1] = 1
+grid[terminal_coord[0], terminal_coord[1]] = 1
+
+start_coord = [np.random.randint(0, grid.shape[0]), np.random.randint(0, grid.shape[1])]
 
 # define policy
 # say we have a random policy, each with 1/4th prob
@@ -20,16 +26,17 @@ for i in range(grid.shape[0]):
 # policy evaluation
 # run through rvery state and finf the value of that particulat state
 # value function is expected return
-start_coord = (np.random.randint(0, grid.shape[0]), np.random.randint(0, grid.shape[1]))
-discount = 0.5
+discount = 0.8
 
-value_table = np.zeros_like(grid)
+value_table = np.zeros_like(grid, dtype=np.float64)
 value_table[:, :] = 0.0
 
 # to store all the versions of thev value table for the stopping condition
+# multiple epochs/ iteratoins
 value_table_renditions = [value_table]
 
 
+# returns state vlaue
 def state_value(
     value_table,
     coord: tuple[int, int],
@@ -61,12 +68,16 @@ def state_value(
     return value
 
 
-def evaluate_policy(value_table_renditions, grid, delta=0.5):
+def evaluate_policy(value_table_renditions, grid, delta=1e-10):
 
     k = 0
 
     while True:
-        curr_value_table = np.zeros_like(grid)
+        # go over every state and evalueate value for each of those states
+        # and store in the value. table for the currnt iteration
+        # rpeat till theupdate in the value tables is less than delta (some small number / threshold)
+
+        curr_value_table = np.zeros_like(grid, dtype=np.float64)
         if (
             k > 2
             and np.linalg.norm(
@@ -89,6 +100,63 @@ def evaluate_policy(value_table_renditions, grid, delta=0.5):
 
 
 value_table_renditions = evaluate_policy(value_table_renditions, grid)
+
+
 from visualization import visualize_value_iteration
 
 visualize_value_iteration(value_table_renditions)
+
+final_value_table = value_table_renditions[-1]
+fvt = final_value_table
+
+curr_coord = start_coord
+
+path = [curr_coord.copy()]
+
+rows, cols = fvt.shape
+
+while curr_coord != terminal_coord:
+
+    vals = []
+    if curr_coord[1] < grid.shape[1] - 1:
+        vals.append((fvt[curr_coord[0], curr_coord[1] + 1], "right"))
+
+    if curr_coord[1] > 0:
+        vals.append((fvt[curr_coord[0], curr_coord[1] - 1], "left"))
+
+    if curr_coord[0] > 0:
+        vals.append((fvt[curr_coord[0] - 1, curr_coord[1]], "up"))
+
+    if curr_coord[0] < grid.shape[0] - 1:
+        vals.append((fvt[curr_coord[0] + 1, curr_coord[1]], "down"))
+
+    curr_coord_action_max_value, best_action = max(vals, key=lambda x: x[0])
+
+    # right
+    if best_action == "right":
+        curr_coord[1] += 1
+    # left
+    if best_action == "left":
+        curr_coord[1] -= 1
+    # down
+    if best_action == "down":
+        curr_coord[0] += 1
+    # up
+    if best_action == "up":
+        curr_coord[0] -= 1
+
+    path.append(curr_coord.copy())
+    print(path)
+
+print(path)
+
+
+from visualization import visualize_path_on_grid
+
+visualize_path_on_grid(
+    fvt=fvt,
+    path=path,
+    terminal_coord=terminal_coord,
+    cell_size=70,
+    delay=400,
+)
