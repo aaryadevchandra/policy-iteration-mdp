@@ -1,46 +1,47 @@
 # Gridworld Policy Evaluation
 
-A simple reinforcement learning project that implements **policy evaluation** on a `10 × 10` Gridworld using NumPy.
+This project implements **policy evaluation** on a `10×10` Gridworld using a random policy.
 
-The agent starts from a random cell and evaluates a random policy where each action has equal probability:
+Each state is updated using the **Bellman expectation equation** until the value table converges. After evaluation, a greedy path is extracted by moving to the neighboring state with the highest value.
 
-- left: `0.25`
-- right: `0.25`
-- up: `0.25`
-- down: `0.25`
+---
 
-After evaluating the state-value function, the agent extracts a greedy path by repeatedly moving to the neighboring state with the highest value.
+## Demo
+
+### Greedy Path Visualization
+
+The video below shows the agent following the greedy path extracted from the final value table.
+
+<video src="path_visualization.mp4" controls width="700"></video>
+
+If the video does not render directly on GitHub, open it here:
+
+[View path visualization video](path_visualization.mp4)
 
 ---
 
 ## Project Overview
 
-This project demonstrates the core idea of **Dynamic Programming in Reinforcement Learning**.
+The goal of this project is to understand how **Dynamic Programming** is used in Reinforcement Learning to estimate the value of states under a fixed policy.
 
-The value of each state is computed using the Bellman expectation equation:
+The project includes:
 
-```math
-V(s) = \sum_a \pi(a|s) [r + \gamma V(s')]
-```
-
-where:
-
-- `V(s)` is the value of state `s`
-- `π(a|s)` is the probability of taking action `a` in state `s`
-- `r` is the reward
-- `γ` is the discount factor
-- `s'` is the next state
-
-The value table is updated repeatedly until convergence.
+- A `10×10` Gridworld environment
+- A terminal state at the bottom-right corner
+- A random policy with equal probability for all actions
+- Iterative policy evaluation
+- Value-table visualization
+- Greedy path extraction from the final value table
+- Path visualization saved as a video
 
 ---
 
 ## Gridworld Setup
 
-The environment is a `10 × 10` grid.
+The environment is a `10×10` grid.
 
 ```text
-S . . . . . . . . .
+. . . . . . . . . .
 . . . . . . . . . .
 . . . . . . . . . .
 . . . . . . . . . .
@@ -52,33 +53,139 @@ S . . . . . . . . .
 . . . . . . . . . T
 ```
 
-- `S` is the random start state
+Where:
+
 - `T` is the terminal state
-- Every non-terminal cell has reward `-1`
-- Terminal cell has reward `+1`
-- Discount factor used: `0.5`
+- Every normal state has reward `-1`
+- The terminal state has reward `+1`
+- The agent starts from a random position
+- The discount factor is set to `0.5`
 
 ---
 
-## Features
+## Policy
 
-- Implements policy evaluation from scratch
-- Uses NumPy for value computation
-- Stores all value-table updates across iterations
-- Visualizes value-table evolution using OpenCV
-- Extracts a greedy path from the final value table
-- Saves the final path visualization as a local video
-- Useful for understanding Bellman updates visually
+The agent starts with a random policy.
+
+For every state:
+
+```text
+left  = 0.25
+right = 0.25
+up    = 0.25
+down  = 0.25
+```
+
+This means the agent is equally likely to move in any of the four directions.
 
 ---
 
-## Installation
+## Bellman Expectation Equation
+
+The value of a state is updated using:
+
+```math
+V(s) = \sum_a \pi(a|s)\left[r + \gamma V(s')\right]
+```
+
+Where:
+
+- `V(s)` is the value of the current state
+- `π(a|s)` is the probability of taking action `a` in state `s`
+- `r` is the reward
+- `γ` is the discount factor
+- `V(s')` is the value of the next state
+
+---
+
+## Policy Evaluation
+
+Policy evaluation estimates the value of every state under the current policy.
+
+The update is repeated until the value table stops changing significantly.
+
+```python
+if np.linalg.norm(V_new - V_old) < delta:
+    break
+```
+
+The final value table tells us how good each state is under the random policy.
+
+---
+
+## Greedy Path Extraction
+
+After policy evaluation, a greedy path is extracted from the final value table.
+
+At each step, the agent looks at the neighboring states and moves to the one with the highest value.
+
+```python
+best_action = argmax(V(next_state))
+```
+
+This is not the same as following the random policy. It is closer to a simple **policy improvement** step.
+
+---
+
+## Visualizations
+
+### Value Table Visualization
+
+The value table is visualized as a heatmap.
+
+Each cell shows the estimated value of that state.
+
+```python
+visualize_value_iteration(value_table_renditions)
+```
+
+### Path Visualization
+
+The final greedy path is saved as:
+
+```text
+path_visualization.mp4
+```
+
+This file is included in the repository and shown in the demo section above.
+
+---
+
+## Example Output
+
+```text
+start: [0, 4]
+terminal: [9, 9]
+
+path:
+[[0, 4], [1, 4], [2, 4], [3, 4], ..., [9, 9]]
+```
+
+The exact path changes because the start position is randomly selected.
+
+---
+
+## Project Structure
+
+```text
+policy-iteration/
+│
+├── main.py
+├── visualization.py
+├── path_visualization.mp4
+├── README.md
+└── .gitignore
+```
+
+---
+
+## How to Run
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/gridworld-policy-evaluation.git
-cd gridworld-policy-evaluation
+git clone https://github.com/aaryadevchandra/policy-iteration.git
+cd policy-iteration
 ```
 
 Install dependencies:
@@ -87,178 +194,61 @@ Install dependencies:
 pip install numpy opencv-python
 ```
 
----
-
-## Running the Project
-
-Run the main script:
+Run the project:
 
 ```bash
 python main.py
 ```
 
-This will:
-
-1. Create a `10 × 10` Gridworld
-2. Initialize a random policy
-3. Run iterative policy evaluation
-4. Visualize the value-table updates
-5. Extract a greedy path from the final value table
-6. Save the path visualization video
-
 ---
 
-## Visualization
-
-### Value Table Evolution
-
-The value table is visualized as a heatmap.
-
-Each cell shows the estimated value of that state. The values update over multiple iterations until convergence.
-
-```python
-visualize_value_iteration(value_table_renditions)
-```
-
----
-
-### Greedy Path Visualization
-
-After policy evaluation, the agent follows the neighboring state with the highest value.
-
-The generated path video is saved locally as:
+## Requirements
 
 ```text
-assets/path_visualization.mp4
+numpy
+opencv-python
 ```
-
-To include the video in the README:
-
-```html
-<video src="assets/path_visualization.mp4" controls width="600"></video>
-```
-
-For better GitHub compatibility, convert the video to GIF and use:
-
-```md
-![Path Visualization](assets/path_visualization.gif)
-```
-
----
-
-## Example Output
-
-```text
-start: [2, 4]
-terminal: [9, 9]
-
-Final path:
-[[2, 4], [3, 4], [4, 4], [5, 4], ..., [9, 9]]
-```
-
-The exact path may change because the start position is randomly selected.
-
----
-
-## Project Structure
-
-```text
-gridworld-policy-evaluation/
-│
-├── main.py
-├── visualization.py
-├── assets/
-│   └── path_visualization.mp4
-│
-└── README.md
-```
-
----
-
-## Core Algorithm
-
-### 1. Initialize Value Table
-
-```python
-value_table = np.zeros_like(grid)
-```
-
-All state values are initialized to zero.
-
----
-
-### 2. Evaluate Policy
-
-For each state, the value is updated based on the expected return under the current policy.
-
-```math
-V(s) = \sum_a \pi(a|s) [r + \gamma V(s')]
-```
-
-Since the policy is random, each action contributes equally.
-
----
-
-### 3. Repeat Until Convergence
-
-The value table is updated until the difference between two consecutive value tables becomes very small.
-
-```python
-if np.linalg.norm(V_new - V_old) < delta:
-    break
-```
-
----
-
-### 4. Extract Greedy Path
-
-After evaluation, the agent chooses the neighboring state with the highest value.
-
-```python
-best_action = argmax(V(next_state))
-```
-
-This creates a greedy path from the start state to the terminal state.
-
----
-
-## Important Note
-
-The value table is produced by evaluating a **random policy**.
-
-The greedy path extraction step is not the same as following the random policy. It is closer to a simple policy improvement step because the agent chooses the best neighboring value.
-
-To make this a full reinforcement learning control algorithm, the next step would be implementing:
-
-- Policy Iteration
-- Value Iteration
-- Monte Carlo Control
-- Q-Learning
 
 ---
 
 ## Concepts Covered
 
+- Reinforcement Learning
 - Markov Decision Processes
 - State-value functions
 - Bellman expectation equation
 - Iterative policy evaluation
-- Discounted returns
 - Greedy policy improvement
-- Gridworld visualization
+- Gridworld environments
+- OpenCV visualization
+
+---
+
+## Important Note
+
+This project evaluates a **random policy** first, then extracts a greedy path from the final value table.
+
+So the path extraction step is not pure policy evaluation. It is closer to a basic policy improvement step.
+
+A full control algorithm would require implementing:
+
+- Policy Iteration
+- Value Iteration
+- Q-Learning
+- Monte Carlo Control
 
 ---
 
 ## Future Improvements
 
-- Add proper policy iteration
-- Add value iteration
+- Implement full policy iteration
+- Implement value iteration
+- Add obstacles and walls
 - Add stochastic transitions
-- Add obstacles/walls
+- Add policy arrows visualization
+- Add GIF export for README compatibility
+- Compare random policy vs improved policy
 - Add multiple terminal states
-- Add GIF export directly
-- Compare random policy vs optimal policy
-- Visualize policy arrows for each state
 
 ---
 
